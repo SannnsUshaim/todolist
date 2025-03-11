@@ -1,0 +1,23 @@
+{
+  "name": "api",
+  "version": "1.0.0",
+  "main": "main.js",
+  "scripts": {
+    "start": "nodemon main.js"
+  },
+  "author": "RPL",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "mysql2": "^3.13.0",
+    "node": "^23.9.0",
+    "nodemon": "^3.1.9"
+  },
+  "directories": {
+    "lib": "lib"
+  },
+  "keywords": [],
+  "description": "",
+  "type": "module"
+}
