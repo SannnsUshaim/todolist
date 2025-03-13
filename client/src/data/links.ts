@@ -2,18 +2,18 @@ import { FileCheck, FileText, Home } from "lucide-react";
 
 export const NavLinks = [
   {
-    label: "Dashboard",
-    base: "/",
+    label: "Home",
+    href: "/",
     icon: Home,
   },
   {
-    label: "Task",
-    base: "/task",
+    label: "Tasks",
+    href: "/tasks",
     icon: FileText,
   },
   {
     label: "Done",
-    base: "/done",
+    href: "/done",
     icon: FileCheck,
   },
 ];
