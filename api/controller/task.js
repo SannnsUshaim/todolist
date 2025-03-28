@@ -20,7 +20,7 @@ export const getAllDoneTasks = (_req, res) => {
 
 export const getTask = (req, res) => {
   const id = req.params.id;
-  const q = `SELECT * FROM task WHERE id = ?`;
+  const q = `SELECT * FROM task WHERE _id = ?`;
   db.query(q, [id], (err, data) => {
     if (err) return res.send(err);
 
@@ -52,18 +52,26 @@ export const updateTask = (req, res) => {
 
 export const deleteTask = (req, res) => {
   const id = req.params.id;
-  const q = `DELETE FROM task WHERE id = ?`;
+  const q = `DELETE FROM task WHERE _id = ?`;
+
   db.query(q, [id], (err, data) => {
-    if (err) return res.send(err);
+    if (err) {
+      console.error("Database error:", err);
+      return res.status(500).json({ error: "Failed to delete task" });
+    }
+
+    if (data.affectedRows === 0) {
+      return res.status(404).json({ message: "Task not found" });
+    }
 
     res.status(200).json({ message: "Task deleted successfully" });
   });
 };
 
 export const updateTaskStatus = (req, res) => {
-  const { id, status } = req.body;
-  const q = `UPDATE task SET status = ? WHERE id = ?`;
-  const values = [status, id];
+  const { _id, status } = req.body;
+  const q = `UPDATE task SET status = ? WHERE _id = ?`;
+  const values = [status, _id];
   db.query(q, values, (err, data) => {
     if (err) return res.send(err);
 

@@ -36,6 +36,7 @@ import { Calendar } from "../../components/ui/calendar";
 import { cn, fetcher } from "../../lib/utils";
 import useSWR from "swr";
 import dayjs from "dayjs";
+import { title } from "process";
 
 export const Save = () => {
   const location = useLocation();
@@ -51,36 +52,67 @@ export const Save = () => {
       title: "",
       description: "",
       priority: "",
-      deadlineDate: "",
-      status: undefined,
+      deadlineDate: undefined,
     },
   });
-  // Perbaikan untuk Date Picker
-  const handleDateSelect = (date: Date | undefined) => {
-    form.setValue("deadlineDate", dayjs(date).format("YYYY-MM-DD"));
-  };
 
-  // Perbaikan untuk Status Select
-  const handleStatusChange = (value: string) => {
-    form.setValue("status", Number(value));
-  };
+  // const [selectedDate, setSelectedDate] = React.useState(null);
+  // Perbaikan untuk Date Picker
+  // const handleSelectedDate = (date) => {
+  //   setSelectedDate(date);
+  // };
+
+  // console.log(form.watch("status"));
+
+  // // Perbaikan untuk Status Select
+  // const handleStatusChange = (value: string) => {
+  //   form.setValue("status", Number(value));
+  // };
+
+  // console.log(form.watch("deadlineDate"));
+
+  React.useEffect(() => {
+    if (task) {
+      form.reset({
+        title: task.title,
+        description: task.description,
+        priority: task.priority,
+        deadlineDate: task.deadlineDate,
+      });
+    }
+  }, [form, task]);
 
   const onSubmit = async (values: z.infer<typeof TaskSchema>) => {
     try {
-      await axios.post("http://localhost:3300/api/tasks/", {
-        title: values.title,
-        description: values.description,
-        priority: values.priority,
-        deadlineDate: dayjs(values.deadlineDate).format("YYYY-MM-DD"),
-        status: values.status,
-      });
-      toast.success("Task created successfully");
-      navigate("/tasks");
+      if (task) {
+        await axios.put("http://localhost:3300/api/tasks/", {
+          _id: taskId,
+          title: values.title,
+          description: values.description,
+          priority: values.priority,
+          deadlineDate: dayjs(values.deadlineDate).format("YYYY-MM-DD"),
+        });
+        toast.success("Task updated successfully");
+        navigate("/tasks");
+        return;
+      } else {
+        await axios.post("http://localhost:3300/api/tasks/", {
+          title: values.title,
+          description: values.description,
+          priority: values.priority,
+          deadlineDate: dayjs(values.deadlineDate).format("YYYY-MM-DD"),
+        });
+        toast.success("Task created successfully");
+        navigate("/tasks");
+      }
     } catch (error) {
-      console.error(error);
+      console.log("AXIOS ERROR : ", error);
+      navigate("/tasks");
+      toast.error("Request error");
     }
     console.log(values);
   };
+
   return (
     <Form {...form}>
       <form
@@ -199,41 +231,11 @@ export const Save = () => {
                         <Calendar
                           mode="single"
                           selected={field.value}
-                          onSelect={handleDateSelect}
+                          onSelect={field.onChange}
                           initialFocus
                         />
                       </PopoverContent>
                     </Popover>
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-
-            {/* <DatePicker  className="bg-gray-100 hover:bg-gray-100"/> */}
-          </div>
-          <div className="col-span-12">
-            <FormField
-              name="status"
-              control={form.control}
-              render={({ field }) => (
-                <FormItem>
-                  <div className="flex items-center gap-2 text-base">
-                    <FormLabel>Status</FormLabel>
-                    <FormMessage />
-                  </div>
-                  <FormControl>
-                    <Select
-                      onValueChange={handleStatusChange}
-                      value={String(field.value)}
-                    >
-                      <SelectTrigger className="bg-gray-100">
-                        <SelectValue placeholder="Status" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value={String(1)}>In Progress</SelectItem>
-                        <SelectItem value={String(0)}>Completed</SelectItem>
-                      </SelectContent>
-                    </Select>
                   </FormControl>
                 </FormItem>
               )}
@@ -248,7 +250,10 @@ export const Save = () => {
             {/* <ChevronLeftCircle size={18}/> */}
             Cancel
           </a>
-          <Button className="bg-primary text-white" type="submit">
+          <Button
+            type="submit"
+            className="bg-primary text-white flex items-center"
+          >
             <FileUp size={18} />
             Save
           </Button>

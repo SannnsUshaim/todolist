@@ -2,12 +2,12 @@ import React from "react";
 import dayjs from "dayjs";
 import { Input } from "../../components/ui/input";
 import { FileQuestion, FileX, PlusCircle, Search } from "lucide-react";
-import { Task } from "../../data/task";
+// import { Task } from "../../data/task";
 import axios from "axios";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import toast from "react-hot-toast";
-import { TaskSchema } from "../../schemas/task";
+import { TaskDeleteSchema } from "../../schemas/task";
 import { useForm } from "react-hook-form";
 import {
   Dialog,
@@ -25,15 +25,21 @@ import {
 import { Button } from "../../components/ui/button";
 import { Link } from "react-router-dom";
 import { Badge } from "../../components/ui/badge";
+import useSWR from "swr";
+import { fetcher } from "@/lib/utils";
 
 export const Report = () => {
   const today = dayjs().format("dddd, DD MMMM YYYY");
-  const task = Task.map((task) => task);
-  const todayData = dayjs().format("YYYY-MM-DD");
-  const priorityOrder = { High: 1, Medium: 2, Low: 3 };
 
-  const form = useForm<z.infer<typeof TaskSchema>>({
-    resolver: zodResolver(TaskSchema),
+  const { data: task, mutate } = useSWR(
+    "http://localhost:3300/api/tasks",
+    fetcher
+  );
+  const todayData = dayjs().format("YYYY-MM-DD");
+  const priorityOrder = { high: 1, medium: 2, low: 3 };
+
+  const form = useForm<z.infer<typeof TaskDeleteSchema>>({
+    resolver: zodResolver(TaskDeleteSchema),
     defaultValues: {
       _id: undefined,
     },
@@ -44,8 +50,7 @@ export const Report = () => {
   const [openModalDelete, setOpenModalDelete] = React.useState(null);
   //   const [status, setStatus] = React.useState(null);
   const [idTask, setIdTask] = React.useState(null);
-  const _id = idTask;
-  const filteredTask = task?.find((task) => task._id === _id);
+  const filteredTask = task?.find((task) => task._id === idTask);
   const statusTask = filteredTask?.status;
   const statusUpdate = statusTask === 1 ? 0 : 1;
 
@@ -86,6 +91,24 @@ export const Report = () => {
     setOpenModal(true);
   };
 
+  React.useEffect(() => {
+    if (idTask) {
+      form.setValue("_id", idTask);
+    }
+  }, [form, idTask]);
+
+  const onDeleteSubmit = async (values: z.infer<typeof TaskDeleteSchema>) => {
+    try {
+      await axios.delete(`http://localhost:3300/api/tasks/${values._id}`);
+      setOpenModalDelete(false);
+      toast.success("Task successfully deleted!");
+      mutate();
+    } catch {
+      setOpenModalDelete(false);
+      toast.error("Request error");
+    }
+  };
+
   return (
     <>
       <Dialog open={openModal} onOpenChange={() => setOpenModal(null)}>
@@ -111,7 +134,7 @@ export const Report = () => {
                 >
                   Cancel
                 </Button>
-                <Link to="/tasks/save" state={{ taskId: _id }}>
+                <Link to="/tasks/save" state={{ taskId: idTask }}>
                   <Button variant="default" className="text-white">
                     Edit
                   </Button>
@@ -145,41 +168,39 @@ export const Report = () => {
                 you sure you want to delete this task?
               </div>
               <Form {...form}>
-                <form id="task">
+                <form id="task" onSubmit={form.handleSubmit(onDeleteSubmit)}>
                   <FormField
                     control={form.control}
                     name="_id"
                     render={({ field }) => (
                       <FormControl>
-                        <Input type="hidden" value={filteredTask?._id} />
+                        <Input type="hidden" value={field.value} />
                       </FormControl>
                     )}
                   />
+                  <div className="flex gap-2 items-center justify-end">
+                    <Button
+                      variant="ghost"
+                      className="text-black hover:bg-transparent hover:text-dark hover:underline transition outline-none focus-visible:ring-0"
+                      onClick={() => setOpenModalDelete(false)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      className="text-white hover:bg-maroonRed"
+                      type="submit"
+                    >
+                      Delete
+                    </Button>
+                  </div>
                 </form>
               </Form>
-              <div className="flex gap-2 items-center justify-end">
-                <Button
-                  variant="ghost"
-                  className="text-black hover:bg-transparent hover:text-dark hover:underline transition outline-none focus-visible:ring-0"
-                  onClick={() => setOpenModalDelete(false)}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  variant="destructive"
-                  className="text-white hover:bg-maroonRed"
-                >
-                  Delete
-                </Button>
-              </div>
             </DialogDescription>
           </DialogHeader>
         </DialogContent>
       </Dialog>
       <div className="grid grid-cols-12 gap-6 pb-4 overflow-y-auto">
-        <div className="col-span-12">
-          <h1 className="text-xl font-semibold">{today}</h1>
-        </div>
         <div className="col-span-6">
           <Input
             className="bg-gray-200"
@@ -214,15 +235,15 @@ export const Report = () => {
           <div className="flex gap-2 items-center text-xl font-semibold">
             <h2 className="font-medium uppercase">TODAY</h2>
             <Badge className="text-white" variant="default">
-              {todayTask.length}
+              {todayTask?.length}
             </Badge>
           </div>
         </div>
         <div className="col-span-12">
           {/* Untuk Today Tasks */}
           <div className="flex overflow-x-auto gap-5 pb-2">
-            {todayTask.length > 0 ? (
-              todayTask.map((task) => (
+            {todayTask?.length > 0 ? (
+              todayTask?.map((task) => (
                 <div
                   key={task._id}
                   onClick={() => {
@@ -232,13 +253,13 @@ export const Report = () => {
                   className="flex-shrink-0 min-w-72 flex flex-col items-start gap-2 bg-dark text-white p-4 rounded-md hover:cursor-pointer" // Tambahkan flex-shrink-0 dan min-w-72
                 >
                   {/* Konten task tetap sama */}
-                  <p className="text-xl font-medium">{task.title}</p>
+                  <p className="text-xl font-medium">{task?.title}</p>
                   <p className="opacity-80">
                     Priority :{" "}
-                    <span className="uppercase">{task.priority}</span>
+                    <span className="uppercase">{task?.priority}</span>
                   </p>
                   <p className="opacity-70">
-                    view details... task id : {task._id}
+                    view details... task id : {task?._id}
                   </p>
                 </div>
               ))
@@ -254,15 +275,15 @@ export const Report = () => {
           <div className="flex gap-2 items-center text-xl font-semibold">
             <h2 className="font-medium uppercase">UPCOMING</h2>
             <Badge className="text-white" variant="default">
-              {upcomingTask.length}
+              {upcomingTask?.length}
             </Badge>
           </div>
         </div>
         <div className="col-span-12">
           {/* Untuk Upcoming Tasks */}
           <div className="flex overflow-x-auto gap-5 pb-2">
-            {upcomingTask.length > 0 ? (
-              upcomingTask.map((task) => (
+            {upcomingTask?.length > 0 ? (
+              upcomingTask?.map((task) => (
                 <div
                   key={task._id}
                   onClick={() => {
@@ -272,14 +293,16 @@ export const Report = () => {
                   className="flex-shrink-0 min-w-72 flex flex-col items-start gap-2 bg-dark text-white p-4 rounded-md hover:cursor-pointer"
                 >
                   {/* Konten task tetap sama */}
-                  <p className="text-xl font-medium">{task.title}</p>
+                  <p className="text-xl font-medium">{task?.title}</p>
                   <p className="opacity-80">
                     Priority :{" "}
-                    <span className="uppercase">{task.priority}</span>
+                    <span className="uppercase">{task?.priority}</span>
                   </p>
-                  <p>{dayjs(task.deadlineDate).format("dddd, DD MMMM YYYY")}</p>
+                  <p>
+                    {dayjs(task?.deadlineDate).format("dddd, DD MMMM YYYY")}
+                  </p>
                   <p className="opacity-70">
-                    view details... task id : {task._id}
+                    view details... task id : {task?._id}
                   </p>
                 </div>
               ))
@@ -295,15 +318,15 @@ export const Report = () => {
           <div className="flex gap-2 items-center text-xl font-semibold">
             <h2 className="font-medium uppercase">OVERDUE</h2>
             <Badge className="text-white" variant="default">
-              {overdueTask.length}
+              {overdueTask?.length}
             </Badge>
           </div>
         </div>
         <div className="col-span-12">
           {/* Untuk Upcoming Tasks */}
           <div className="flex overflow-x-auto gap-5 pb-2">
-            {overdueTask.length > 0 ? (
-              overdueTask.map((task) => (
+            {overdueTask?.length > 0 ? (
+              overdueTask?.map((task) => (
                 <div
                   key={task._id}
                   onClick={() => {
@@ -313,14 +336,16 @@ export const Report = () => {
                   className="flex-shrink-0 min-w-72 flex flex-col items-start gap-2 bg-secondary p-4 rounded-md hover:cursor-pointer animate-infinite animate-pulse duration-1000"
                 >
                   {/* Konten task tetap sama */}
-                  <p className="text-xl font-medium">{task.title}</p>
+                  <p className="text-xl font-medium">{task?.title}</p>
                   <p className="opacity-80">
                     Priority :{" "}
-                    <span className="uppercase">{task.priority}</span>
+                    <span className="uppercase">{task?.priority}</span>
                   </p>
-                  <p>{dayjs(task.deadlineDate).format("dddd, DD MMMM YYYY")}</p>
+                  <p>
+                    {dayjs(task?.deadlineDate).format("dddd, DD MMMM YYYY")}
+                  </p>
                   <p className="opacity-70">
-                    view details... task id : {task._id}
+                    view details... task id : {task?._id}
                   </p>
                 </div>
               ))

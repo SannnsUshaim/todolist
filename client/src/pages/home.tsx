@@ -19,30 +19,36 @@ import {
 import { Form, FormControl, FormField, FormItem } from "../components/ui/form";
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
+import useSWR from "swr";
+import { fetcher } from "@/lib/utils";
 
 export const Home = () => {
   const today = dayjs().format("dddd, DD MMMM YYYY");
-  const task = Task.map((task) => task);
+  const { data: task, mutate } = useSWR(
+    "http://localhost:3300/api/tasks",
+    fetcher
+  );
   const todayData = dayjs().format("YYYY-MM-DD");
-  const priorityOrder = { High: 1, Medium: 2, Low: 3 };
+  const priorityOrder = { high: 1, medium: 2, low: 3 };
 
   const form = useForm<z.infer<typeof TaskStatusSchema>>({
     resolver: zodResolver(TaskStatusSchema),
     defaultValues: {
+      _id: undefined,
       status: undefined,
     },
   });
 
   const [search, setSearch] = React.useState("");
   const [openModal, setOpenModal] = React.useState(null);
+  const [openModalDone, setOpenModalDone] = React.useState(null);
   //   const [status, setStatus] = React.useState(null);
   const [idTask, setIdTask] = React.useState(null);
-  const _id = idTask;
-  const filteredTask = task?.find((task) => task._id == _id);
+  const filteredTask = task?.find((task) => task._id == idTask);
   const statusTask = filteredTask?.status;
   const statusUpdate = statusTask === 1 ? 0 : 1;
 
-  form.setValue("_id", _id);
+  form.setValue("_id", idTask);
   form.setValue("status", statusUpdate);
 
   const filterSearchTasks = (tasks) => {
@@ -82,6 +88,21 @@ export const Home = () => {
     setOpenModal(true);
   };
 
+  const onDoneSubmit = async (values: z.infer<typeof TaskStatusSchema>) => {
+    try {
+      await axios.put("http://localhost:3300/api/tasks/updateStatus", {
+        _id: values._id,
+        status: values.status,
+      });
+      toast.success("Task Done");
+      setOpenModalDone(false);
+      mutate();
+    } catch {
+      toast.error("Request error");
+      setOpenModalDone(false);
+    }
+  };
+
   return (
     <>
       <Dialog open={openModal} onOpenChange={() => setOpenModal(null)}>
@@ -97,8 +118,38 @@ export const Home = () => {
                 <span className="font-bold">{filteredTask?.priority}</span>
               </div>
               <div>{filteredTask?.description}</div>
+              <div className="flex gap-2 justify-end">
+                <Button
+                  variant="ghost"
+                  className="text-black hover:bg-transparent hover:text-dark hover:underline transition outline-none focus-visible:ring-0"
+                  onClick={() => setOpenModal(false)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="default"
+                  onClick={() => {
+                    setOpenModal(false), setOpenModalDone(true);
+                  }}
+                  className="bg-primary text-white hover:bg-primary/80"
+                >
+                  Done
+                </Button>
+              </div>
+            </DialogDescription>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
+      <Dialog open={openModalDone} onOpenChange={() => setOpenModalDone(null)}>
+        <DialogContent>
+          <DialogHeader className="gap-3 font-medium text-black">
+            <DialogTitle>{filteredTask?.title}</DialogTitle>
+            <DialogDescription className="flex flex-col gap-2">
+              <div>
+                You're gonna done a {filteredTask?.Title} task, are you sure?
+              </div>
               <Form {...form}>
-                <form id="task">
+                <form id="task" onSubmit={form.handleSubmit(onDoneSubmit)}>
                   <div className="hidden">
                     <FormField
                       control={form.control}
@@ -136,7 +187,6 @@ export const Home = () => {
                     <Button
                       variant="default"
                       type="submit"
-                      form="task"
                       className="bg-primary text-white hover:bg-primary/80"
                     >
                       Done
@@ -179,15 +229,15 @@ export const Home = () => {
           <div className="flex gap-2 items-center text-xl font-semibold">
             <h2 className="font-medium uppercase">TODAY</h2>
             <Badge variant="default" className="text-white">
-              {todayTask.length}
+              {todayTask?.length}
             </Badge>
           </div>
         </div>
         <div className="col-span-12">
           {/* Untuk Today Tasks */}
           <div className="flex overflow-x-auto gap-5 pb-2">
-            {todayTask.length > 0 ? (
-              todayTask.map((task) => (
+            {todayTask?.length > 0 ? (
+              todayTask?.map((task) => (
                 <div
                   key={task._id}
                   onClick={() => {
@@ -218,15 +268,15 @@ export const Home = () => {
           <div className="flex gap-2 items-center text-xl font-semibold">
             <h2 className="font-medium uppercase">UPCOMING</h2>
             <Badge variant="default" className="text-white">
-              {upcomingTask.length}
+              {upcomingTask?.length}
             </Badge>
           </div>
         </div>
         <div className="col-span-12">
           {/* Untuk Upcoming Tasks */}
           <div className="flex overflow-x-auto gap-5 pb-2">
-            {upcomingTask.length > 0 ? (
-              upcomingTask.map((task) => (
+            {upcomingTask?.length > 0 ? (
+              upcomingTask?.map((task) => (
                 <div
                   key={task._id}
                   onClick={() => {
@@ -258,15 +308,15 @@ export const Home = () => {
           <div className="flex gap-2 items-center text-xl font-semibold">
             <h2 className="font-medium uppercase">OVERDUE</h2>
             <Badge variant="default" className="text-white">
-              {overdueTask.length}
+              {overdueTask?.length}
             </Badge>
           </div>
         </div>
         <div className="col-span-12">
           {/* Untuk Upcoming Tasks */}
           <div className="flex overflow-x-auto gap-5 pb-2">
-            {overdueTask.length > 0 ? (
-              overdueTask.map((task) => (
+            {overdueTask?.length > 0 ? (
+              overdueTask?.map((task) => (
                 <div
                   key={task._id}
                   onClick={() => {
