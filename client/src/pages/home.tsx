@@ -115,7 +115,7 @@ export const Home = () => {
               </div>
               <div>
                 Priority :{" "}
-                <span className="font-bold">{filteredTask?.priority}</span>
+                <span className="font-bold uppercase">{filteredTask?.priority}</span>
               </div>
               <div>{filteredTask?.description}</div>
               <div className="flex gap-2 justify-end">
@@ -146,7 +146,9 @@ export const Home = () => {
             <DialogTitle>{filteredTask?.title}</DialogTitle>
             <DialogDescription className="flex flex-col gap-2">
               <div>
-                You're gonna done a {filteredTask?.Title} task, are you sure?
+                You're gonna completed a{" "}
+                <span className="font-bold">{filteredTask?.title}</span> task,
+                are you sure?
               </div>
               <Form {...form}>
                 <form id="task" onSubmit={form.handleSubmit(onDoneSubmit)}>
@@ -180,7 +182,8 @@ export const Home = () => {
                     <Button
                       variant="ghost"
                       className="text-black hover:bg-transparent hover:text-dark hover:underline transition outline-none focus-visible:ring-0"
-                      onClick={() => setOpenModal(false)}
+                      onClick={() => setOpenModalDone(false)}
+                      type="button"
                     >
                       Cancel
                     </Button>
@@ -251,9 +254,7 @@ export const Home = () => {
                     Priority :{" "}
                     <span className="uppercase">{task.priority}</span>
                   </p>
-                  <p className="opacity-70">
-                    view details... task id : {task._id}
-                  </p>
+                  <p className="opacity-70">view details...</p>
                 </div>
               ))
             ) : (
@@ -291,9 +292,7 @@ export const Home = () => {
                     <span className="uppercase">{task.priority}</span>
                   </p>
                   <p>{dayjs(task.deadlineDate).format("dddd, DD MMMM YYYY")}</p>
-                  <p className="opacity-70">
-                    view details... task id : {task._id}
-                  </p>
+                  <p className="opacity-70">view details...</p>
                 </div>
               ))
             ) : (
@@ -331,9 +330,7 @@ export const Home = () => {
                     <span className="uppercase">{task.priority}</span>
                   </p>
                   <p>{dayjs(task.deadlineDate).format("dddd, DD MMMM YYYY")}</p>
-                  <p className="opacity-70">
-                    view details... task id : {task._id}
-                  </p>
+                  <p className="opacity-70">view details...</p>
                 </div>
               ))
             ) : (

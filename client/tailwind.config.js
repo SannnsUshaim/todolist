@@ -9,7 +9,6 @@ export default {
         dark: "#102C57",
         secondary: "#FFB1B1",
         lighterSecondary: "#FFCBCB",
-        maroonRed: "#8E1616",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         card: {

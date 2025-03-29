@@ -12,8 +12,8 @@ export const NavLinks = [
     icon: FileText,
   },
   {
-    label: "Done",
-    href: "/done",
+    label: "Completed",
+    href: "/complete",
     icon: FileCheck,
   },
 ];

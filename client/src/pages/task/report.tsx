@@ -123,7 +123,7 @@ export const Report = () => {
               </div>
               <div>
                 Priority :{" "}
-                <span className="font-bold">{filteredTask?.priority}</span>
+                <span className="font-bold uppercase">{filteredTask?.priority}</span>
               </div>
               <div>{filteredTask?.description}</div>
               <div className="flex gap-2 items-center justify-end">
@@ -183,6 +183,7 @@ export const Report = () => {
                       variant="ghost"
                       className="text-black hover:bg-transparent hover:text-dark hover:underline transition outline-none focus-visible:ring-0"
                       onClick={() => setOpenModalDelete(false)}
+                      type="button"
                     >
                       Cancel
                     </Button>
@@ -259,7 +260,7 @@ export const Report = () => {
                     <span className="uppercase">{task?.priority}</span>
                   </p>
                   <p className="opacity-70">
-                    view details... task id : {task?._id}
+                    view details...
                   </p>
                 </div>
               ))
@@ -302,7 +303,7 @@ export const Report = () => {
                     {dayjs(task?.deadlineDate).format("dddd, DD MMMM YYYY")}
                   </p>
                   <p className="opacity-70">
-                    view details... task id : {task?._id}
+                    view details...
                   </p>
                 </div>
               ))
@@ -345,7 +346,7 @@ export const Report = () => {
                     {dayjs(task?.deadlineDate).format("dddd, DD MMMM YYYY")}
                   </p>
                   <p className="opacity-70">
-                    view details... task id : {task?._id}
+                    view details...
                   </p>
                 </div>
               ))

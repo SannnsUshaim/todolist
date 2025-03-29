@@ -31,12 +31,11 @@ import {
   PopoverTrigger,
 } from "../../components/ui/popover";
 import { Button } from "../../components/ui/button";
-import { CalendarIcon, ChevronLeftCircle, FileUp } from "lucide-react";
+import { CalendarIcon, FileUp } from "lucide-react";
 import { Calendar } from "../../components/ui/calendar";
 import { cn, fetcher } from "../../lib/utils";
 import useSWR from "swr";
 import dayjs from "dayjs";
-import { title } from "process";
 
 export const Save = () => {
   const location = useLocation();
