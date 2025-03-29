@@ -11,12 +11,14 @@ import {
   DialogTitle,
 } from "../../components/ui/dialog";
 import { Button } from "../../components/ui/button";
-import { TaskDeleteSchema } from "../../schemas/task";
+import {
+  TaskDeleteSchema
+} from "../../schemas/task";
 import axios from "axios";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import toast from "react-hot-toast";
-import { useForm } from "react-hook-form";
+import { useFieldArray, useForm } from "react-hook-form";
 import { Form, FormControl, FormField } from "../../components/ui/form";
 import { Input } from "../../components/ui/input";
 
@@ -41,13 +43,24 @@ export const Report = () => {
   const [tab, setTab] = React.useState("all");
   const [idTask, setIdTask] = React.useState(null);
   const filteredTask = tasks?.find((task) => task._id === idTask);
-  const [openModal, setOpenModal] = React.useState(null);
-  const [openModalDelete, setOpenModalDelete] = React.useState(null);
+  const [openModal, setOpenModal] = React.useState(false);
+  const [openModalDelete, setOpenModalDelete] = React.useState(false);
 
-  const onDeleteSubmit = (values: z.infer<typeof TaskDeleteSchema>) => {};
+  const onDeleteSubmit = async (values: z.infer<typeof TaskDeleteSchema>) => {
+    try {
+      await axios.delete(`http://localhost:3300/api/tasks/${values._id}`);
+      setOpenModalDelete(false);
+      toast.success("Task successfully deleted!");
+      mutate();
+    } catch {
+      setOpenModalDelete(false);
+      toast.error("Request error");
+    }
+  };
 
   return (
     <>
+      {/* details */}
       <Dialog open={openModal} onOpenChange={() => setOpenModal(null)}>
         <DialogContent>
           <DialogHeader className="gap-3 font-medium text-black">
@@ -89,6 +102,7 @@ export const Report = () => {
           </DialogHeader>
         </DialogContent>
       </Dialog>
+      {/* delete */}
       <Dialog
         open={openModalDelete}
         onOpenChange={() => setOpenModalDelete(null)}
@@ -176,9 +190,10 @@ export const Report = () => {
               {tasks?.map((task) => (
                 <div
                   key={task._id}
-                  className="flex flex-col gap-2 min-w-72 bg-dark text-white rounded-md p-4 hover:cursor-pointer"
+                  className={`flex flex-col gap-2 min-w-72 bg-dark text-white rounded-md p-4 hover:cursor-pointer relative`}
                   onClick={() => {
-                    setOpenModal(true), setIdTask(task._id);
+                    setOpenModal(true);
+                    setIdTask(task._id);
                   }}
                 >
                   <p className="text-xl font-medium">{task?.title}</p>

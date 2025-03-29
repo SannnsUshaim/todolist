@@ -115,7 +115,9 @@ export const Home = () => {
               </div>
               <div>
                 Priority :{" "}
-                <span className="font-bold uppercase">{filteredTask?.priority}</span>
+                <span className="font-bold uppercase">
+                  {filteredTask?.priority}
+                </span>
               </div>
               <div>{filteredTask?.description}</div>
               <div className="flex gap-2 justify-end">
@@ -232,7 +234,7 @@ export const Home = () => {
           <div className="flex gap-2 items-center text-xl font-semibold">
             <h2 className="font-medium uppercase">TODAY</h2>
             <Badge variant="default" className="text-white">
-              {todayTask?.length}
+              {todayTask?.length > 0 ? todayTask?.length : 0}
             </Badge>
           </div>
         </div>
@@ -269,7 +271,7 @@ export const Home = () => {
           <div className="flex gap-2 items-center text-xl font-semibold">
             <h2 className="font-medium uppercase">UPCOMING</h2>
             <Badge variant="default" className="text-white">
-              {upcomingTask?.length}
+              {upcomingTask?.length > 0 ? upcomingTask?.length : 0}
             </Badge>
           </div>
         </div>
@@ -307,7 +309,7 @@ export const Home = () => {
           <div className="flex gap-2 items-center text-xl font-semibold">
             <h2 className="font-medium uppercase">OVERDUE</h2>
             <Badge variant="default" className="text-white">
-              {overdueTask?.length}
+              {overdueTask?.length > 0 ? overdueTask?.length : 0}
             </Badge>
           </div>
         </div>

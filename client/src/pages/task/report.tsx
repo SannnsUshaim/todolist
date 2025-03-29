@@ -123,7 +123,9 @@ export const Report = () => {
               </div>
               <div>
                 Priority :{" "}
-                <span className="font-bold uppercase">{filteredTask?.priority}</span>
+                <span className="font-bold uppercase">
+                  {filteredTask?.priority}
+                </span>
               </div>
               <div>{filteredTask?.description}</div>
               <div className="flex gap-2 items-center justify-end">
@@ -236,7 +238,7 @@ export const Report = () => {
           <div className="flex gap-2 items-center text-xl font-semibold">
             <h2 className="font-medium uppercase">TODAY</h2>
             <Badge className="text-white" variant="default">
-              {todayTask?.length}
+              {todayTask?.length > 0 ? todayTask?.length : 0}
             </Badge>
           </div>
         </div>
@@ -259,9 +261,7 @@ export const Report = () => {
                     Priority :{" "}
                     <span className="uppercase">{task?.priority}</span>
                   </p>
-                  <p className="opacity-70">
-                    view details...
-                  </p>
+                  <p className="opacity-70">view details...</p>
                 </div>
               ))
             ) : (
@@ -276,7 +276,7 @@ export const Report = () => {
           <div className="flex gap-2 items-center text-xl font-semibold">
             <h2 className="font-medium uppercase">UPCOMING</h2>
             <Badge className="text-white" variant="default">
-              {upcomingTask?.length}
+              {upcomingTask?.length > 0 ? upcomingTask?.length : 0}
             </Badge>
           </div>
         </div>
@@ -302,9 +302,7 @@ export const Report = () => {
                   <p>
                     {dayjs(task?.deadlineDate).format("dddd, DD MMMM YYYY")}
                   </p>
-                  <p className="opacity-70">
-                    view details...
-                  </p>
+                  <p className="opacity-70">view details...</p>
                 </div>
               ))
             ) : (
@@ -319,7 +317,7 @@ export const Report = () => {
           <div className="flex gap-2 items-center text-xl font-semibold">
             <h2 className="font-medium uppercase">OVERDUE</h2>
             <Badge className="text-white" variant="default">
-              {overdueTask?.length}
+              {overdueTask?.length > 0 ? overdueTask?.length : 0}
             </Badge>
           </div>
         </div>
@@ -345,9 +343,7 @@ export const Report = () => {
                   <p>
                     {dayjs(task?.deadlineDate).format("dddd, DD MMMM YYYY")}
                   </p>
-                  <p className="opacity-70">
-                    view details...
-                  </p>
+                  <p className="opacity-70">view details...</p>
                 </div>
               ))
             ) : (
